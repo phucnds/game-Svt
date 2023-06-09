@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta name="screen-orientation" content="" />
+  <meta name="x5-orientation" content="">
+  <title>{{{ PRODUCT_NAME }}}</title>
+  <style>
+    *,
+    html,
+    body {
+      padding: 0;
+      margin: 0;
+      outline: none;
+      border: none;
+      /* width: 100%;
+      height: 100%; */
+      overflow: hidden;
+    }
+
+    .loading-container {
+      transform: translate(-50%, -50%);
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      top: 50%;
+      left: 50%;
+      z-index: 1000;
+    }
+
+    .img-loading {
+      position: absolute;
+      width: 70%;
+      height: auto;
+      transform: translate(-50%, -50%);
+    }
+
+    .bar {
+      top: 75%
+    }
+
+    .fill {
+      -webkit-mask-image: url("imgs/bar.png");
+      mask-image: url("imgs/bar.png");
+      -webkit-mask-repeat: no-repeat;
+      mask-repeat: no-repeat;
+
+      -webkit-mask-position: -794px 40%;
+      mask-position: -794px 40%;
+    }
+
+    @media only screen and (orientation: landscape) {
+      body {
+        height: 100vw;
+        width: 100vh;
+        transform: translate(-50%, -50%) rotate(90deg);
+        top: 50vh;
+        left: 50vw;
+        position: fixed;
+      }
+
+      canvas {
+        height: 100vw;
+        width: 100vh;
+      }
+    }
+
+    @media only screen and (orientation:portrait) {
+
+      *,
+      html,
+      body {
+        padding: 0;
+        margin: 0;
+        outline: none;
+        border: none;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+      }
+
+      canvas {
+        height: 100vh;
+        width: 100vw;
+      }
+
+      .container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+      }
+    }
+  </style>
+  <meta name="viewport"
+    content="width=device-width,user-scalable=no,initial-scale=1, minimum-scale=1,maximum-scale=1" />
+  </style>
+
+</head>
+
+<body style="text-align: center">
+  <canvas id="unity-canvas" class="container" width={{{ WIDTH }}} height={{{ HEIGHT }}}
+    style="width:100%; height: 100%; background: url('Build/build.jpg'); background-size: 100% 100%;"></canvas>
+  <div class="loading-container" id="loading-container">
+    <img src="imgs/bar.png" width="800" height="34" class="img-loading bar">
+    <img src="imgs/fill.png" width="793" height="24" class="img-loading bar fill" id="loading-fill">
+  </div>
+  <script src='./js/detect-provider.js'></script>
+  <script src='./js/BigNumber.js'></script>
+  <script type="module">
+    import { ethers } from "./js/ethers.js";
+    window.ethers = ethers;
+    async function importLib() {
+      var lib = await import('./js/out.js');
+      window.services_wsgw = lib.default;
+      return lib;
+    }
+    importLib();
+  </script>
+  <!-- <script src="TemplateData/web3.min.js"></script> -->
+  <script src="Build/{{{ LOADER_FILENAME }}}"></script>
+  <script>
+    window.LANDSCAPE_MODE = true
+    createUnityInstance(document.querySelector("#unity-canvas"), {
+      dataUrl: "Build/{{{ DATA_FILENAME }}}",
+      frameworkUrl: "Build/{{{ FRAMEWORK_FILENAME }}}",
+      codeUrl: "Build/{{{ CODE_FILENAME }}}",
+      #if MEMORY_FILENAME
+        memoryUrl: "Build/{{{ MEMORY_FILENAME }}}",
+      #endif
+#if SYMBOLS_FILENAME
+        symbolsUrl: "Build/{{{ SYMBOLS_FILENAME }}}",
+      #endif
+        streamingAssetsUrl: "StreamingAssets",
+      companyName: "{{{ COMPANY_NAME }}}",
+      productName: "{{{ PRODUCT_NAME }}}",
+      productVersion: "{{{ PRODUCT_VERSION }}}",
+      matchWebGLToCanvasSize: false,
+      devicePixelRatio: 1, // Uncomment this to override low DPI rendering on high DPI displays.
+    }, (progress) => {
+      let fill = document.getElementById("loading-fill")
+      fill.style.webkitMaskPosition = `-${794 - 794 * progress}px 40%`
+    }).then((unityInstance) => {
+      document.body.removeChild(document.getElementById("loading-container"))
+      window.unityInstance = unityInstance;
+      let element = document.body;
+      let requestMethod = element.requestFullScreen || element.webkitRequestFullScreen || element.mozRequestFullScreen || element.msRequestFullScreen;
+      var lockOrientation = screen.orientation.lock || screen.webkitLockOrientation || screen.mozLockOrientation || screen.msLockOrientation;
+
+      // setInterval(() => {
+      //   // screen.orientation.lock("landscape").then().catch((e) => { console.log(e);});
+      //   // if (lockOrientation("landscape")) {
+      //   //   console.log("lock success");
+      //   // } else {
+      //   //   console.log("lock fail");
+      //   // }
+
+      //   let address = null;
+      //   if (window.ethereum) {
+      //     web3 = new Web3(window.ethereum);
+      //     address = web3.currentProvider.selectedAddress;
+      //   }
+
+      //   if(address) {
+      //     // requestMethod && requestMethod.call(element);
+      //   }
+      // }, 3000)
+    });
+  </script>
+</body>
+
+</html>
